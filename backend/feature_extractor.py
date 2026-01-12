@@ -148,3 +148,70 @@ class CodeBERTFeatureExtractor:
         embeddings = self.extract_embeddings(code)
         # Reduce dimensionality to 15 features
         return embeddings[:15] if len(embeddings) > 15 else embeddings
+
+
+class LanguageSpecificExtractor:
+    """Extract language-specific features for Python, Java, and C++"""
+    
+    def extract_python_features(self, code: str) -> List[int]:
+        """Extract Python-specific features"""
+        features = []
+        
+        # Count of function definitions
+        features.append(len(re.findall(r'\bdef\s+\w+\s*\(', code)))
+        
+        # Count of class definitions
+        features.append(len(re.findall(r'\bclass\s+\w+', code)))
+        
+        # Count of imports
+        features.append(len(re.findall(r'\b(import|from)\s+', code)))
+        
+        # Count of decorators
+        features.append(len(re.findall(r'@\w+', code)))
+        
+        # Count of try-except blocks
+        features.append(len(re.findall(r'\btry\s*:', code)))
+        
+        return features
+    
+    def extract_java_features(self, code: str) -> List[int]:
+        """Extract Java-specific features"""
+        features = []
+        
+        # Count of class definitions
+        features.append(len(re.findall(r'\bclass\s+\w+', code)))
+        
+        # Count of method definitions
+        features.append(len(re.findall(r'\bpublic\s+\w+\s+\w+\s*\(', code)))
+        
+        # Count of interface definitions
+        features.append(len(re.findall(r'\binterface\s+\w+', code)))
+        
+        # Count of try-catch blocks
+        features.append(len(re.findall(r'\btry\s*\{', code)))
+        
+        # Count of synchronized blocks
+        features.append(len(re.findall(r'\bsynchronized\s*\(', code)))
+        
+        return features
+    
+    def extract_cpp_features(self, code: str) -> List[int]:
+        """Extract C++-specific features"""
+        features = []
+        
+        # Count of class definitions
+        features.append(len(re.findall(r'\bclass\s+\w+', code)))
+        
+        # Count of function definitions
+        features.append(len(re.findall(r'\w+\s+\w+\s*\([^)]*\)\s*\{', code)))
+        
+        # Count of templates
+        features.append(len(re.findall(r'\btemplate\s*<', code)))
+        
+        # Count of pointers
+        features.append(len(re.findall(r'\*', code)))
+        
+        # Count of memory operations (new/delete)
+        features.append(len(re.findall(r'\b(new|delete)\s+', code)))
+        
+        return features
