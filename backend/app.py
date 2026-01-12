@@ -4,10 +4,10 @@ from pydantic import BaseModel
 import joblib
 import numpy as np
 from typing import List
-import uvicorn
-from multi_language_detector import MultiLanguageDetector, LanguageSpecificExtractor
+from multi_language_detector import MultiLanguageDetector
+from feature_extractor import LanguageSpecificExtractor
 
-app = FastAPI(title="AI Bug Detection API")
+app = FastAPI(title="AI Bug Detection API")")
 
 # Enable CORS
 app.add_middleware(
