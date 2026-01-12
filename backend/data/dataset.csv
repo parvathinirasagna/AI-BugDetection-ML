@@ -1,0 +1,11 @@
+code_snippet,is_bug
+"def add(a, b): return a + b",0
+"def divide(a, b): return a / b if b else 0",0
+"x = 1; y = 2; print(x + y)",0
+"arr = [1,2,3]; print(arr[5])",1
+"def buggy(): z = undefined_var; return z",1
+"for i in range(10): print(i)",0
+"import os; os.system('rm -rf /')",1
+"class MyClass: def __init__(self): self.x = 1",0
+"try: x = 1/0 except: pass",0
+"while True: pass",1
