@@ -5,6 +5,7 @@ import joblib
 import numpy as np
 from typing import List
 import uvicorn
+from multi_language_detector import MultiLanguageDetector, LanguageSpecificExtractor
 
 app = FastAPI(title="AI Bug Detection API")
 
@@ -35,6 +36,10 @@ try:
 except:
     print("Improved model not found")
 
+
+# Initialize multi-language detector
+multi_detector = MultiLanguageDetector()
+lang_extractor = LanguageSpecificExtractor()
 class CodeInput(BaseModel):
     code_snippet: str
 
@@ -113,6 +118,24 @@ def detect_bug(input_data: CodeInput):
             "is_bug": is_bug,
             "confidence_baseline": baseline_conf,
             "confidence_improved": improved_conf
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@app.post("/analyze-multilang")
+def analyze_multilang(code_input: CodeInput):
+    """Analyze code in multiple languages (Python, Java, C++)"""
+    try:
+        # Detect language and analyze
+        result = multi_detector.analyze_code(code_input.code_snippet)
+        
+        return {
+            "language": result['language'],
+            "bugs_found": result['bugs_found'],
+            "bug_count": len(result['bugs_found']),
+            "severity": result['severity'],
+            "feature_count": result['feature_count'],
+            "supported_languages": ['python', 'java', 'cpp']
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
