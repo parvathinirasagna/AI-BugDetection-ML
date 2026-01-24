@@ -3,6 +3,7 @@ import './App.css';
 
 function App() {
   const [codeInput, setCodeInput] = useState('');
+  const [language, setLanguage] = useState('python');
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,107 +19,189 @@ function App() {
     setResult(null);
 
     try {
-      const response = await fetch('http://localhost:8000/detect_bug', {
+      const response = await fetch('http://localhost:8000/analyze-multilang', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           code_snippet: codeInput,
+          language: language,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Backend API error');
+        throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
       setResult(data);
     } catch (err) {
-      setError(err.message || 'Failed to detect bugs');
+      setError(err.message || 'Failed to analyze code');
+      console.error('Error:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const renderBugStatus = () => {
+    if (!result) return null;
+
+    const isBug = result.is_bug;
+    const icon = isBug ? '🔴' : '✅';
+    const status = isBug ? 'BUG DETECTED' : 'NO BUG DETECTED';
+    const statusClass = isBug ? 'bug-status bug' : 'bug-status safe';
+
+    return <div className={statusClass}>{icon} {status}</div>;
+  };
+
+  const renderConfidence = () => {
+    if (!result) return null;
+
+    const baseline = result.baseline_confidence || 0;
+    const improved = result.improved_confidence || 0;
+
+    return (
+      <div className="confidence-container">
+        <div className="model-prediction">
+          <h3>Baseline Model (Nadim & Roy 2022)</h3>
+          <div className="confidence-bar">
+            <div 
+              className="confidence-fill baseline" 
+              style={{ width: `${baseline}%` }}
+            ></div>
+          </div>
+          <p className="confidence-text">{baseline.toFixed(1)}% Confidence</p>
+        </div>
+
+        <div className="model-prediction">
+          <h3>Improved Model (CodeBERT + Ensemble)</h3>
+          <div className="confidence-bar">
+            <div 
+              className="confidence-fill improved" 
+              style={{ width: `${improved}%` }}
+            ></div>
+          </div>
+          <p className="confidence-text">{improved.toFixed(1)}% Confidence</p>
+        </div>
+
+        {improved > baseline && (
+          <div className="improvement-badge">
+            📈 Improvement: +{(improved - baseline).toFixed(1)}%
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderBugExplanation = () => {
+    if (!result || !result.is_bug) return null;
+
+    const explanation = result.explanation || result.bug_type || 'Bug detected in code';
+    const bugDetails = result.bug_details || [];
+
+    return (
+      <div className="bug-explanation">
+        <h3>🐛 Why This Code is Wrong:</h3>
+        <p className="explanation-main">{explanation}</p>
+        
+        {bugDetails && bugDetails.length > 0 && (
+          <div className="bug-details">
+            <h4>Detected Issues:</h4>
+            <ul>
+              {bugDetails.map((detail, idx) => (
+                <li key={idx}>{detail}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {result.suggestion && (
+          <div className="suggestion">
+            <h4>💡 Suggestion:</h4>
+            <p>{result.suggestion}</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderLanguageIcon = () => {
+    const icons = {
+      python: '🐍',
+      java: '☕',
+      cpp: '⚙️',
+    };
+    return icons[language] || '💻';
+  };
+
   return (
-    <div className="App">
+    <div className="app-container">
       <header className="app-header">
         <h1>🔍 AI-Powered Bug Detection</h1>
         <p>Detect potential bugs in your code using ML models</p>
+        <p className="powered-by">Backend: localhost:8000 | Frontend: localhost:3000</p>
       </header>
 
-      <div className="app-container">
-        <div className="left-section">
-          <h2>Enter Your Code</h2>
-          <textarea
-            value={codeInput}
-            onChange={(e) => setCodeInput(e.target.value)}
-            placeholder="Paste Python code here..."
-            style={{
-              width: '100%',
-              height: '300px',
-              padding: '10px',
-              fontFamily: 'monospace',
-              fontSize: '14px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              marginTop: '10px',
-              marginBottom: '15px',
-            }}
-          />
-          <button
+      <div className="main-content">
+        <div className="input-section">
+          <div className="language-selector">
+            <label>Language: {renderLanguageIcon()}</label>
+            <select 
+              value={language} 
+              onChange={(e) => setLanguage(e.target.value)}
+              className="language-select"
+            >
+              <option value="python">Python 🐍</option>
+              <option value="java">Java ☕</option>
+              <option value="cpp">C++ ⚙️</option>
+            </select>
+          </div>
+
+          <div className="code-input-wrapper">
+            <label>Enter Your Code</label>
+            <textarea
+              value={codeInput}
+              onChange={(e) => setCodeInput(e.target.value)}
+              placeholder={`Paste your ${language} code here...`}
+              className="code-input"
+              rows="12"
+            />
+          </div>
+
+          <button 
             onClick={handleDetectBug}
             disabled={isLoading}
-            style={{
-              width: '100%',
-              padding: '10px 20px',
-              backgroundColor: '#667eea',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '16px',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              opacity: isLoading ? 0.6 : 1,
-            }}
+            className="detect-button"
           >
-            {isLoading ? 'Analyzing...' : 'Detect Bugs'}
+            {isLoading ? '🔄 Analyzing...' : '🔍 Detect Bugs'}
           </button>
+
+          {error && <div className="error-message">❌ {error}</div>}
         </div>
 
-        <div className="right-section">
-          {error && (
-            <div className="error-message" style={{ color: '#c33', padding: '10px', backgroundColor: '#fee', borderRadius: '4px' }}>
-              ❌ {error}
+        <div className="results-section">
+          <h2>Results</h2>
+          
+          {!result ? (
+            <div className="no-results">
+              <p>Submit code to see analysis results...</p>
             </div>
-          )}
-
-          {isLoading && (
-            <div className="loading-message" style={{ textAlign: 'center', padding: '40px' }}>
-              <p>Analyzing code...</p>
-            </div>
-          )}
-
-          {result && (
-            <div style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '4px' }}>
-              <h3>Results</h3>
-              <p><strong>Is Bug:</strong> {result.is_bug ? '🔴 YES - Bug Detected' : '🟢 NO - Code OK'}</p>
-              <p><strong>Baseline Prediction:</strong> {result.baseline_prediction ? 'Bug' : 'OK'} (Confidence: {(result.confidence_baseline * 100).toFixed(1)}%)</p>
-              <p><strong>Improved Prediction:</strong> {result.improved_prediction ? 'Bug' : 'OK'} (Confidence: {(result.confidence_improved * 100).toFixed(1)}%)</p>
-            </div>
-          )}
-
-          {!result && !isLoading && !error && (
-            <div className="empty-state" style={{ textAlign: 'center', color: '#999', padding: '40px' }}>
-              <p>👈 Enter code on the left to detect bugs</p>
-            </div>
+          ) : (
+            <>
+              {renderBugStatus()}
+              {renderConfidence()}
+              {renderBugExplanation()}
+              
+              {result.language_detected && (
+                <div className="metadata">
+                  <p><strong>Detected Language:</strong> {result.language_detected}</p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
-
-      <footer className="app-footer">
-        <p>AI Bug Detection • Backend: localhost:8000 | Frontend: localhost:3000</p>
-      </footer>
     </div>
   );
 }
