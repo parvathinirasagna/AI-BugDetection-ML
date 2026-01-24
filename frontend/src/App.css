@@ -1,4 +1,4 @@
-.App {
+.app-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 40px 20px;
@@ -18,88 +18,319 @@
 
 .app-header p {
   font-size: 1.1rem;
+  margin: 5px 0;
+}
+
+.powered-by {
+  font-size: 0.9rem;
   opacity: 0.9;
 }
 
-.app-container {
-  max-width: 1200px;
-  margin: 0 auto;
+.main-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.left-section,
-.right-section {
+.input-section, .results-section {
   background: white;
   border-radius: 15px;
   padding: 30px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
-.right-section {
-  overflow-y: auto;
-  max-height: 600px;
+.results-section h2 {
+  color: #333;
+  margin-top: 0;
+  font-size: 1.5rem;
+  border-bottom: 3px solid #667eea;
+  padding-bottom: 10px;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: #999;
+.language-selector {
+  margin-bottom: 20px;
 }
 
-.empty-state p {
+.language-selector label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 1rem;
+}
+
+.language-select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.language-select:hover, .language-select:focus {
+  border-color: #667eea;
+  outline: none;
+}
+
+.code-input-wrapper {
+  margin-bottom: 20px;
+}
+
+.code-input-wrapper label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.code-input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95rem;
+  resize: vertical;
+  transition: border-color 0.3s;
+}
+
+.code-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.detect-button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
   font-size: 1.1rem;
-  margin: 10px 0;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.loading-message {
-  text-align: center;
-  padding: 40px;
+.detect-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-.spinner {
-  border: 4px solid #f0f0f0;
-  border-top: 4px solid #667eea;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 20px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.detect-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .error-message {
   background-color: #fee;
-  border-left: 4px solid #f44;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-radius: 4px;
   color: #c33;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 15px;
+  border-left: 4px solid #c33;
 }
 
-.app-footer {
+.no-results {
   text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-style: italic;
+}
+
+.bug-status {
+  font-size: 1.3rem;
+  font-weight: bold;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.bug-status.bug {
+  background-color: #ffe0e0;
+  color: #d32f2f;
+  border: 2px solid #d32f2f;
+}
+
+.bug-status.safe {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 2px solid #2e7d32;
+}
+
+.confidence-container {
+  margin: 20px 0;
+}
+
+.model-prediction {
+  margin-bottom: 25px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border-left: 5px solid #667eea;
+}
+
+.model-prediction h3 {
+  color: #333;
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+}
+
+.confidence-bar {
+  width: 100%;
+  height: 25px;
+  background-color: #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.confidence-fill {
+  height: 100%;
+  transition: width 0.6s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: white;
-  margin-top: 40px;
-  opacity: 0.8;
+  font-weight: bold;
+  font-size: 0.8rem;
 }
 
-.app-footer p {
+.confidence-fill.baseline {
+  background: linear-gradient(90deg, #ff9800, #ffc107);
+}
+
+.confidence-fill.improved {
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+}
+
+.confidence-text {
+  color: #666;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.improvement-badge {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+  margin-top: 15px;
+  font-size: 1.1rem;
+  border: 2px solid #2e7d32;
+}
+
+.bug-explanation {
+  background-color: #fff3e0;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+  border-left: 5px solid #ff9800;
+}
+
+.bug-explanation h3 {
+  color: #e65100;
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.explanation-main {
+  color: #333;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 10px 0 15px 0;
+  padding: 10px;
+  background-color: white;
+  border-radius: 5px;
+}
+
+.bug-details {
+  background-color: white;
+  padding: 15px;
+  border-radius: 5px;
+  margin: 15px 0;
+}
+
+.bug-details h4 {
+  color: #d32f2f;
+  margin-top: 0;
+}
+
+.bug-details ul {
+  margin: 10px 0;
+  padding-left: 25px;
+}
+
+.bug-details li {
+  color: #555;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.suggestion {
+  background-color: #e3f2fd;
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 15px;
+  border-left: 4px solid #1976d2;
+}
+
+.suggestion h4 {
+  color: #1565c0;
+  margin-top: 0;
+}
+
+.suggestion p {
+  color: #333;
+  margin: 10px 0;
+  line-height: 1.6;
+}
+
+.metadata {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 15px;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.metadata p {
   margin: 5px 0;
-  font-size: 0.9rem;
 }
 
-@media (max-width: 768px) {
-  .app-container {
+@media (max-width: 1024px) {
+  .main-content {
     grid-template-columns: 1fr;
   }
   
   .app-header h1 {
-    font-size: 1.8rem;
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-container {
+    padding: 20px 10px;
+  }
+  
+  .input-section, .results-section {
+    padding: 20px;
+  }
+  
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .app-header p {
+    font-size: 0.9rem;
   }
 }
