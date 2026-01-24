@@ -7,7 +7,7 @@ from typing import List
 from multi_language_detector import MultiLanguageDetector
 from feature_extractor import LanguageSpecificExtractor
 
-app = FastAPI(title="AI Bug Detection API")")
+app = FastAPI(title="AI Bug Detection API")
 
 # Enable CORS
 app.add_middleware(
